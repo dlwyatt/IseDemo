@@ -55,16 +55,11 @@ function LoadSlide($Index)
 
         $Script:OpenFiles = @(
             Get-ChildItem $slidePath\* -File -Exclude Hint.txt |
-            Sort-Object -Property { $_.BaseName -as [int] } |
+            Sort-Object -Property { ($_.BaseName -replace '\D') -as [int] } |
             ForEach-Object {
                 $psise.CurrentPowerShellTab.Files.Add($_.FullName)
             }
         )
-
-        #if ($Script:OpenFiles.Count -gt 0)
-        #{
-        #    $null = $psise.CurrentPowerShellTab.Files.SetSelectedFile($script:OpenFiles[0])
-        #}
 
         if ($Script:ShowHints)
         {
@@ -94,23 +89,11 @@ function ClearCurrentPowerShellTab
 
 function ShowHints
 {
-    $currentPath = Join-Path $Script:BasePath "$script:CurrentIndex\Hint.txt"
-    $prevPath    = Join-Path $Script:BasePath "$($script:CurrentIndex - 1)\Hint.txt"
-    $nextPath    = Join-Path $Script:BasePath "$($script:CurrentIndex + 1)\Hint.txt"
-
-    if ($prevPath -gt 0 -and (Test-Path -LiteralPath $prevPath -PathType Leaf))
-    {
-        Write-Host -ForegroundColor Cyan "Previous: $(Get-Content $prevPath)"
-    }
-
-    if (Test-Path -LiteralPath $currentPath -PathType Leaf)
-    {
-        Write-Host -ForegroundColor Cyan "Current : $(Get-Content $currentPath)"
-    }
+    $nextPath = Join-Path $Script:BasePath "$($script:CurrentIndex + 1)\Hint.txt"
 
     if (Test-Path -LiteralPath $nextPath -PathType Leaf)
     {
-        Write-Host -ForegroundColor Cyan "Next    : $(Get-Content $nextPath)"
+        Write-Host -ForegroundColor Cyan "Next: $(Get-Content $nextPath)"
     }
 }
 
@@ -142,3 +125,5 @@ if ($null -eq $existingNextGesture)
 }
 
 Set-Alias -Name sid -Value Start-IseDemo
+Set-Alias -Name nid -Value Invoke-NextIseDemo
+Set-Alias -Name pid -Value Invoke-PreviousIseDemo
