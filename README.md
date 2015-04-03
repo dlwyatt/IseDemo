@@ -6,8 +6,10 @@ Basically, it's an executable slide deck, cutting down on time spent typing or c
 
 Demos are directory structures:
 
-<Root Path>\1\
-<Root Path>\2\
+(Root Path)\\1\\
+
+(Root Path)\\2\\
+
 etc
 
 The numbered folders can contain any number of files, which will all be opened in the ISE when you advanced to that "slide".
