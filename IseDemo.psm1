@@ -1,10 +1,3 @@
-#requires -Version 3.0
-
-if ($null -eq $psISE -or $psISE.GetType().FullName -ne 'Microsoft.PowerShell.Host.ISE.ObjectModelRoot')
-{
-    throw 'The IseDemo module only works in the PowerShell ISE.'
-}
-
 function Start-IseDemo
 {
     [CmdletBinding()]
