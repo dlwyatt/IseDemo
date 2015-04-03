@@ -2,11 +2,14 @@ function Start-IseDemo
 {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)]
         [string] $Path,
-
         [switch] $ShowHints
     )
+
+    if (-not $Path)
+    {
+        $Path = $PSCmdlet.SessionState.Path.CurrentFileSystemLocation
+    }
 
     $script:CurrentIndex = 0
     $script:BasePath = $Path
@@ -37,6 +40,8 @@ function Invoke-PreviousIseDemo
 
 function LoadSlide($Index)
 {
+    ClearCurrentPowerShellTab
+
     if ($Index -le 0) {
         Write-Warning 'Beginning of Demo.'
         return
@@ -46,20 +51,20 @@ function LoadSlide($Index)
 
     if (Test-Path -LiteralPath $slidePath -PathType Container)
     {
-        ClearCurrentPowerShellTab
-
         $Script:CurrentIndex = $Index
 
-        Get-ChildItem $slidePath\* -File -Exclude Hint.txt |
-        Sort-Object -Property { $_.BaseName -as [int] } |
-        ForEach-Object {
-            $null = $psise.CurrentPowerShellTab.Files.Add($_.FullName)
-        }
+        $Script:OpenFiles = @(
+            Get-ChildItem $slidePath\* -File -Exclude Hint.txt |
+            Sort-Object -Property { $_.BaseName -as [int] } |
+            ForEach-Object {
+                $psise.CurrentPowerShellTab.Files.Add($_.FullName)
+            }
+        )
 
-        if ($psise.CurrentPowerShellTab.Files.Count -gt 0)
-        {
-            $null = $psise.CurrentPowerShellTab.Files.SetSelectedFile($psise.CurrentPowerShellTab.Files[0])
-        }
+        #if ($Script:OpenFiles.Count -gt 0)
+        #{
+        #    $null = $psise.CurrentPowerShellTab.Files.SetSelectedFile($script:OpenFiles[0])
+        #}
 
         if ($Script:ShowHints)
         {
@@ -74,38 +79,43 @@ function LoadSlide($Index)
 }
 function ClearCurrentPowerShellTab
 {
-    foreach ($iseFile in $psISE.CurrentPowerShellTab.Files)
+    foreach ($iseFile in $script:OpenFiles)
     {
-        if (-not $iseFile.IsSaved) { $iseFile.SaveAs("$env:temp\Discard.ps1") }
+        if (-not $psISE.CurrentPowerShellTab.Files.Contains($iseFile))
+        {
+            continue
+        }
+
+        $psISE.CurrentPowerShellTab.Files.Remove($iseFile, $true)
     }
 
-    $psISE.CurrentPowerShellTab.Files.Clear()
+    $script:OpenFiles = @()
 }
 
 function ShowHints
 {
     $currentPath = Join-Path $Script:BasePath "$script:CurrentIndex\Hint.txt"
-    $prevPath = Join-Path $Script:BasePath "$($script:CurrentIndex - 1)\Hint.txt"
-    $nextPath = Join-Path $Script:BasePath "$($script:CurrentIndex + 1)\Hint.txt"
+    $prevPath    = Join-Path $Script:BasePath "$($script:CurrentIndex - 1)\Hint.txt"
+    $nextPath    = Join-Path $Script:BasePath "$($script:CurrentIndex + 1)\Hint.txt"
 
     if ($prevPath -gt 0 -and (Test-Path -LiteralPath $prevPath -PathType Leaf))
     {
-        Write-Host "Previous: $(Get-Content $prevPath)"
+        Write-Host -ForegroundColor Cyan "Previous: $(Get-Content $prevPath)"
     }
 
     if (Test-Path -LiteralPath $currentPath -PathType Leaf)
     {
-        Write-Host "Current : $(Get-Content $currentPath)"
+        Write-Host -ForegroundColor Cyan "Current : $(Get-Content $currentPath)"
     }
 
     if (Test-Path -LiteralPath $nextPath -PathType Leaf)
     {
-        Write-Host "Next    : $(Get-Content $nextPath)"
+        Write-Host -ForegroundColor Cyan "Next    : $(Get-Content $nextPath)"
     }
 }
 
-$prevGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::Left, ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Alt))
-$nextGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::Right, ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Alt))
+$prevGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::PageUp,   [System.Windows.Input.ModifierKeys]::Control)
+$nextGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::PageDown, [System.Windows.Input.ModifierKeys]::Control)
 
 $existingPrevGesture = $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus |
                        Where-Object {
@@ -130,3 +140,5 @@ if ($null -eq $existingNextGesture)
 {
     $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add('Next ISE Demo Slide', {Invoke-NextIseDemo}, $nextGesture)
 }
+
+Set-Alias -Name sid -Value Start-IseDemo
