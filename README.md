@@ -21,3 +21,5 @@ slide will be opened.  Advancing to the next or previous slide can be done with 
 CTRL+ALT+Left .  (These shortcuts just execute the commands Invoke-NextIseDemo and Invoke-PreviousIseDemo.)
 
 To start the demo, run Start-IseDemo -Path $PathToRootFolder [-ShowHints].
+
+NOTE: Don't use this module while working on anything you actually want to save.  When you advance slides, your changes are thrown out, and all files are closed.  (TODO:  Make it so the module only closes tabs that it has opened, rather than closing everything.)
