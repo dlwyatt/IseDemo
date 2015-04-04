@@ -52,6 +52,7 @@ function LoadSlide($Index)
     if (Test-Path -LiteralPath $slidePath -PathType Container)
     {
         $Script:CurrentIndex = $Index
+        Push-Location -LiteralPath $slidePath -StackName IseDemo
 
         $Script:OpenFiles = @(
             Get-ChildItem $slidePath\* -File -Exclude Hint.txt |
@@ -60,6 +61,8 @@ function LoadSlide($Index)
                 $psise.CurrentPowerShellTab.Files.Add($_.FullName)
             }
         )
+
+        $psISE.CurrentPowerShellTab.Files.SelectedFile = $Script:OpenFiles[0]
 
         if ($Script:ShowHints)
         {
@@ -84,6 +87,7 @@ function ClearCurrentPowerShellTab
         $psISE.CurrentPowerShellTab.Files.Remove($iseFile, $true)
     }
 
+    Pop-Location -StackName IseDemo -ErrorAction Ignore
     $script:OpenFiles = @()
 }
 
@@ -97,8 +101,8 @@ function ShowHints
     }
 }
 
-$prevGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::PageUp,   [System.Windows.Input.ModifierKeys]::Control)
-$nextGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::PageDown, [System.Windows.Input.ModifierKeys]::Control)
+$prevGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::OemComma,   [System.Windows.Input.ModifierKeys]::Control)
+$nextGesture = New-Object System.Windows.Input.KeyGesture([System.Windows.Input.Key]::OemPeriod, [System.Windows.Input.ModifierKeys]::Control)
 
 $existingPrevGesture = $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus |
                        Where-Object {

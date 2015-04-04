@@ -17,7 +17,7 @@ Each numbered folder may optionally contain a file named Hint.txt.  This won't b
 in the console if you use the -ShowHints switch of Start-IseDemo.
 
 When you advanced to a new slide, all open files in the current ISE Powershell tab will be closed, then the files of the new
-slide will be opened.  Advancing to the next or previous slide can be done with the keyboard shortcuts CTRL+PageDown and
-CTRL+PageUp.  (These shortcuts just execute the commands Invoke-NextIseDemo and Invoke-PreviousIseDemo.)
+slide will be opened.  Advancing to the next or previous slide can be done with the keyboard shortcuts CTRL+Comma and
+CTRL+Period.  (These shortcuts just execute the commands Invoke-NextIseDemo and Invoke-PreviousIseDemo.)
 
 To start the demo, run Start-IseDemo -Path $PathToRootFolder [-ShowHints].
